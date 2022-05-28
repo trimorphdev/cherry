@@ -1,7 +1,6 @@
-<div style="text-align: center">
-    <img src="logo.png" width="35%" />
-    <p><b>v0.0.0-alpha</b></p>
-</div>
+<p align="center">
+    <img src="logo.png" width="50%" />
+</p>
 
 ## The Project
 Cherry is a weakly statically typed, type safe, memory managed programming language inspired by both TypeScript and Rust.  Cherry's goals are:
