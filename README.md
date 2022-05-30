@@ -4,7 +4,7 @@
 
 <p align="center">
     <img alt="GitHub issues" src="https://img.shields.io/github/issues/trimorphdev/cherry?style=for-the-badge">
-    <img alt="Travis (.com)" src="https://img.shields.io/travis/com/trimorphdev/berry?style=for-the-badge">
+    <img alt="Cirrus CI - Base Branch Build Status" src="https://img.shields.io/cirrus/github/trimorphdev/cherry?style=for-the-badge">
     <img alt="GitHub" src="https://img.shields.io/github/license/trimorphdev/cherry?color=blue&style=for-the-badge">
 </p>
 
