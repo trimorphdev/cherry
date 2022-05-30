@@ -2,6 +2,12 @@
     <img src="logo.svg" width="50%" />
 </p>
 
+<p align="center">
+    <img alt="GitHub issues" src="https://img.shields.io/github/issues/trimorphdev/cherry?style=for-the-badge">
+    <img alt="Travis (.com)" src="https://img.shields.io/travis/com/trimorphdev/berry?style=for-the-badge">
+    <img alt="GitHub" src="https://img.shields.io/github/license/trimorphdev/cherry?color=blue&style=for-the-badge">
+</p>
+
 ## The Project
 Cherry is a weakly statically typed, type safe, memory managed programming language inspired by both TypeScript and Rust.  Cherry's goals are:
 
