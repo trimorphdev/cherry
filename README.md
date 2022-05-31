@@ -21,10 +21,10 @@ Now, here's what Cherry's goals *aren't*:
 
 ## Project Checklist
 > **note:** This section will be removed when the project is past the alpha and beta stages.
-- 🗹 The lexer.
-- 🗷 The diagnostic system.
-- 🗷 The parser.
-- 🗷 The code generator.
+- [x] The lexer.
+- [ ] The diagnostic system.
+- [ ] The parser.
+- [ ] The code generator.
 
 ## Examples
 > **note:** It is not guaranteed that these examples will work when Cherry is finished, as its syntax may change.
