@@ -1,4 +1,6 @@
 [workspace]
 members = [
-    "compiler/ccherry-lexer"
+    "compiler/ccherry",
+    "compiler/ccherry-diagnostics",
+    "compiler/ccherry-lexer",
 ]

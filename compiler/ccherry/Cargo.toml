@@ -1,0 +1,11 @@
+[package]
+name = "ccherry"
+version = "0.0.0-alpha"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+ccherry-diagnostics = { path = "../ccherry-diagnostics", version = "0.0.0-alpha" }
+ccherry-lexer = { path = "../ccherry-lexer", version = "0.0.0-alpha" }
+clap = "3.1.18"
