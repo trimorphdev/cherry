@@ -8,7 +8,12 @@
     <img alt="GitHub" src="https://img.shields.io/github/license/trimorphdev/cherry?color=blue&style=for-the-badge">
 </p>
 
-## The Project
+## Table of Contents
+- [About](#about)
+- [Project Checklist](#project-checklist)
+- [Examples](#examples)
+
+## About
 Cherry is a weakly statically typed, type safe, memory managed programming language inspired by both TypeScript and Rust.  Cherry's goals are:
 
 - To be type and memory safe
@@ -22,8 +27,17 @@ Now, here's what Cherry's goals *aren't*:
 ## Project Checklist
 > **note:** This section will be removed when the project is past the alpha and beta stages.
 - [x] The lexer.
-- [ ] The diagnostic system.
+- [ ] The command line interface.
+    - [ ] Diagnostic emitter, using `codespan-reporting`.
 - [ ] The parser.
+    - [ ] Basic literals.pex
+    - [ ] Operator precedence.
+    - [ ] Type annotations.
+    - [ ] `let` and `const` statements.
+    - [ ] Control statements, like `for`, `while`, `if` and `match`.
+    - [ ] Function definitions.
+    - [ ] Data structures; `enum`, `struct` and `type`.
+    - [ ] Import statements.
 - [ ] The code generator.
 
 ## Examples
