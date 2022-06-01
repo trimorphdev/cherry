@@ -619,6 +619,7 @@ impl Lexer {
             }
 
             if self.chars[self.idx] == quote {
+                self.idx += 1;
                 string.push(quote);
                 break;
             } else if self.chars[self.idx] == '\\' {
