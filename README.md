@@ -27,10 +27,10 @@ Now, here's what Cherry's goals *aren't*:
 ## Project Checklist
 > **note:** This section will be removed when the project is past the alpha and beta stages.
 - [x] The lexer.
-- [ ] The command line interface.
+- [x] The command line interface.
     - [x] Diagnostic emitter, using `codespan-reporting`.
         - [x] Add multiple available themes.
-        - [ ] Allow themes to be changed on command line interface
+        - [x] Allow themes to be changed on command line interface
 - [ ] The parser.
     - [ ] Basic literals.pex
     - [ ] Operator precedence.
