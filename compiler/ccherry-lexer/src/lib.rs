@@ -1,33 +1,36 @@
 mod token;
 
-pub use token::{Comment, CommentKind, Float, Group, Iden, Int, IntKind, Loc, Punct, Skipped, Spacing, Str,
-                TokenTree};
+pub use token::{
+    Comment, CommentKind, Float, Group, Iden, Int, IntKind, Loc, Punct, Skipped, Spacing, Str,
+    TokenTree,
+};
 
 use codespan_reporting::diagnostic::{Diagnostic, Label};
 use snailquote::{unescape, UnescapeError};
 use unicode_xid::UnicodeXID;
 
 /// Cherry's lexer.
-/// 
-/// At this phase in the parser, keywords are interpreted simply as identifiers.  This means that, in
-/// theory, this lexer can be used for any programming language which uses usual characters and strings.
+///
+/// At this phase in the parser, keywords are interpreted simply as identifiers.
+/// This means that, in theory, this lexer can be used for any programming
+/// language which uses usual characters and strings.
 pub struct Lexer {
-    /// The characters to tokenize.  This originates from the source string, provided at the creation of
-    /// this lexer.
+    /// The characters to tokenize.  This originates from the source string,
+    /// provided at the creation of this lexer.
     chars: Vec<char>,
 
-    /// The index of the current token, in the `chars` list.  This should be the index of the first
-    /// character of the next token.
+    /// The index of the current token, in the `chars` list.  This should be the
+    /// index of the first character of the next token.
     idx: usize,
 
-    /// List of comments.  The comments in this list will be added onto the next token found, and then
-    /// this list will be cleared.
+    /// List of comments.  The comments in this list will be added onto the next
+    /// token found, and then this list will be cleared.
     comments: Vec<Comment>,
 }
 
 impl Lexer {
-    /// Initializes a new lexer from the provided `source` string.  This function initializes the lexer
-    /// with a default index of `0`.
+    /// Initializes a new lexer from the provided `source` string.  This
+    /// function initializes the lexer with a default index of `0`.
     pub fn new(source: &str) -> Self {
         Self {
             chars: source.chars().collect(),
@@ -39,44 +42,25 @@ impl Lexer {
     /// Returns whether or not `char` is a line breaking character.
     pub fn is_line_break(char: char) -> bool {
         match char {
-            '\u{000A}'
-            | '\u{000B}'
-            | '\u{000C}'
-            | '\u{000D}'
-            | '\u{0085}'
-            | '\u{2028}'
+            '\u{000A}' | '\u{000B}' | '\u{000C}' | '\u{000D}' | '\u{0085}' | '\u{2028}'
             | '\u{2029}' => true,
             _ => false,
         }
     }
 
-    /// Returns whether or not `char` is a whitespace character, excluding any line breaking whitespace.
+    /// Returns whether or not `char` is a whitespace character, excluding any
+    /// line breaking whitespace.
     pub fn is_whitespace(char: char) -> bool {
         match char {
-            '\u{0009}'
-            | '\u{0020}'
-            | '\u{00A0}'
-            | '\u{1680}'
-            | '\u{2000}'
-            | '\u{2001}' 
-            | '\u{2002}' 
-            | '\u{2003}' 
-            | '\u{2004}' 
-            | '\u{2005}'
-            | '\u{2006}'
-            | '\u{2007}'
-            | '\u{2008}'
-            | '\u{2009}'
-            | '\u{200A}'
-            | '\u{202F}'
-            | '\u{205F}'
-            | '\u{3000}' => true,
+            '\u{0009}' | '\u{0020}' | '\u{00A0}' | '\u{1680}' | '\u{2000}' | '\u{2001}'
+            | '\u{2002}' | '\u{2003}' | '\u{2004}' | '\u{2005}' | '\u{2006}' | '\u{2007}'
+            | '\u{2008}' | '\u{2009}' | '\u{200A}' | '\u{202F}' | '\u{205F}' | '\u{3000}' => true,
             _ => false,
         }
     }
 
-    /// Returns whether or not `char` is an identifier starting character.  Checks if `char` is an
-    /// XID_Start character or an underscore (`_`).
+    /// Returns whether or not `char` is an identifier starting character.
+    /// Checks if `char` is an XID_Start character or an underscore (`_`).
     pub fn is_iden(char: char) -> bool {
         UnicodeXID::is_xid_start(char) || char == '_'
     }
@@ -84,8 +68,8 @@ impl Lexer {
     /// Returns whether or not `char` is a punctuator.
     pub fn is_punct(char: char) -> bool {
         match char {
-            '!' | '@' | '#' | '$' | '%' | '&' | '*' | ';' | ':' | ',' | '.' | '<' | '>' | '/' | '|'
-            | '-' | '=' | '+' | '?' | '~' => true,
+            '!' | '@' | '#' | '$' | '%' | '&' | '*' | ';' | ':' | ',' | '.' | '<' | '>' | '/'
+            | '|' | '-' | '=' | '+' | '?' | '~' => true,
             _ => false,
         }
     }
@@ -149,17 +133,15 @@ impl Lexer {
 
         loop {
             if self.idx >= self.chars.len() {
-                return Err(
-                    Diagnostic::error()
-                        .with_code("E0001")
-                        .with_labels(vec![
-                            Label::primary((), self.idx..self.idx)
-                                .with_message("expected block comment to end here"),
-                            Label::secondary((), start_index..start_index + 2)
-                                .with_message("help: block comment started here"),
-                        ])
-                        .with_message("block comment never ends")
-                );
+                return Err(Diagnostic::error()
+                    .with_code("E0001")
+                    .with_labels(vec![
+                        Label::primary((), self.idx..self.idx)
+                            .with_message("expected block comment to end here"),
+                        Label::secondary((), start_index..start_index + 2)
+                            .with_message("help: block comment started here"),
+                    ])
+                    .with_message("block comment never ends"));
             }
 
             if self.chars[self.idx] == '*' {
@@ -167,17 +149,15 @@ impl Lexer {
                 self.idx += 1;
 
                 if self.idx >= self.chars.len() {
-                    return Err(
-                        Diagnostic::error()
-                            .with_code("E0001")
-                            .with_labels(vec![
-                                Label::primary((), self.idx..self.idx)
-                                    .with_message("expected block comment to end here"),
-                                Label::secondary((), start_index..start_index + 2)
-                                    .with_message("help: block comment started here"),
-                            ])
-                            .with_message("block comment never ends")
-                    );
+                    return Err(Diagnostic::error()
+                        .with_code("E0001")
+                        .with_labels(vec![
+                            Label::primary((), self.idx..self.idx)
+                                .with_message("expected block comment to end here"),
+                            Label::secondary((), start_index..start_index + 2)
+                                .with_message("help: block comment started here"),
+                        ])
+                        .with_message("block comment never ends"));
                 }
 
                 if self.chars[self.idx] != '/' {
@@ -203,8 +183,8 @@ impl Lexer {
         }))
     }
 
-    /// Skips a single skippable token, such as a whitespace, line break or comment.  Returns information
-    /// about the skipped token, if any.
+    /// Skips a single skippable token, such as a whitespace, line break or
+    /// comment.  Returns information about the skipped token, if any.
     fn skip_token(&mut self) -> Result<Skipped, Diagnostic<()>> {
         if self.idx >= self.chars.len() {
             return Ok(Skipped::None);
@@ -250,14 +230,12 @@ impl Lexer {
             let result = self.skip_token();
 
             match result {
-                Ok(skipped) => {
-                    match skipped {
-                        Skipped::Comment(comment) => {
-                            self.comments.push(comment);
-                        },
-                        Skipped::None => return Ok(()),
-                        _ => {},
+                Ok(skipped) => match skipped {
+                    Skipped::Comment(comment) => {
+                        self.comments.push(comment);
                     }
+                    Skipped::None => return Ok(()),
+                    _ => {}
                 },
                 Err(err) => return Err(err),
             }
@@ -272,19 +250,19 @@ impl Lexer {
             let result = self.skip_token();
 
             match result {
-                Ok(skipped) => {
-                    match skipped {
-                        Skipped::Comment(comment) => {
-                            has_whitespace = true;
-                            self.comments.push(comment);
-                        },
-                        Skipped::Whitespace => has_whitespace = true,
-                        Skipped::LineBreak => return Ok(Spacing::LineBreak),
-                        Skipped::None => if has_whitespace {
+                Ok(skipped) => match skipped {
+                    Skipped::Comment(comment) => {
+                        has_whitespace = true;
+                        self.comments.push(comment);
+                    }
+                    Skipped::Whitespace => has_whitespace = true,
+                    Skipped::LineBreak => return Ok(Spacing::LineBreak),
+                    Skipped::None => {
+                        if has_whitespace {
                             return Ok(Spacing::Whitespace);
                         } else {
                             return Ok(Spacing::None);
-                        },
+                        }
                     }
                 },
                 Err(err) => return Err(err),
@@ -292,13 +270,13 @@ impl Lexer {
         }
     }
 
-    /// Gets all comments from the `comments` array and returns them, after clearing the `comments`
-    /// array.
+    /// Gets all comments from the `comments` array and returns them, after
+    /// clearing the `comments` array.
     fn get_comments(&mut self) -> Vec<Comment> {
         let comments = self.comments.clone();
         self.comments.clear();
         comments
-    }    
+    }
 
     /// Tokenizes an identifier token.
     fn tokenize_iden(&mut self) -> Result<TokenTree, Diagnostic<()>> {
@@ -328,12 +306,9 @@ impl Lexer {
         if self.idx >= self.chars.len() {
             return Err(Diagnostic::error()
                 .with_code("E0008")
-                .with_labels(vec![
-                    Label::primary((), start_index..self.idx)
-                        .with_message("expected a hexadecimal number here"),
-                ])
-                .with_message("no hexadecimal number after `0x`")
-            );
+                .with_labels(vec![Label::primary((), start_index..self.idx)
+                    .with_message("expected a hexadecimal number here")])
+                .with_message("no hexadecimal number after `0x`"));
         }
 
         let mut first = true;
@@ -344,12 +319,9 @@ impl Lexer {
                 if first {
                     return Err(Diagnostic::error()
                         .with_code("E0008")
-                        .with_labels(vec![
-                            Label::primary((), start_index..self.idx - 1)
-                                .with_message("expected a hexadecimal number here"),
-                        ])
-                        .with_message("no hexadecimal number after `0x`")
-                    );
+                        .with_labels(vec![Label::primary((), start_index..self.idx - 1)
+                            .with_message("expected a hexadecimal number here")])
+                        .with_message("no hexadecimal number after `0x`"));
                 } else {
                     break;
                 }
@@ -359,12 +331,9 @@ impl Lexer {
                 if first {
                     return Err(Diagnostic::error()
                         .with_code("E0008")
-                        .with_labels(vec![
-                            Label::primary((), start_index..self.idx - 1)
-                                .with_message("expected a hexadecimal number here"),
-                        ])
-                        .with_message("no hexadecimal number after `0x`")
-                    );
+                        .with_labels(vec![Label::primary((), start_index..self.idx - 1)
+                            .with_message("expected a hexadecimal number here")])
+                        .with_message("no hexadecimal number after `0x`"));
                 } else {
                     break;
                 }
@@ -388,12 +357,9 @@ impl Lexer {
             })),
             Err(_) => Err(Diagnostic::error()
                 .with_code("E0009")
-                .with_labels(vec![
-                    Label::primary((), start_index..self.idx)
-                        .with_message("hexadecimal number is too large")
-                ])
-                .with_message("hexadecimal number is too large.")
-            )
+                .with_labels(vec![Label::primary((), start_index..self.idx)
+                    .with_message("hexadecimal number is too large")])
+                .with_message("hexadecimal number is too large.")),
         }
     }
 
@@ -404,12 +370,9 @@ impl Lexer {
         if self.idx >= self.chars.len() {
             return Err(Diagnostic::error()
                 .with_code("E0008")
-                .with_labels(vec![
-                    Label::primary((), start_index..self.idx)
-                        .with_message("expected a binary number here"),
-                ])
-                .with_message("no binary number after `0b`")
-            );
+                .with_labels(vec![Label::primary((), start_index..self.idx)
+                    .with_message("expected a binary number here")])
+                .with_message("no binary number after `0b`"));
         }
 
         let mut first = true;
@@ -420,12 +383,9 @@ impl Lexer {
                 if first {
                     return Err(Diagnostic::error()
                         .with_code("E0008")
-                        .with_labels(vec![
-                            Label::primary((), start_index..self.idx - 1)
-                                .with_message("expected a binary number here"),
-                        ])
-                        .with_message("no binary number after `0b`")
-                    );
+                        .with_labels(vec![Label::primary((), start_index..self.idx - 1)
+                            .with_message("expected a binary number here")])
+                        .with_message("no binary number after `0b`"));
                 } else {
                     break;
                 }
@@ -435,12 +395,9 @@ impl Lexer {
                 if first {
                     return Err(Diagnostic::error()
                         .with_code("E0008")
-                        .with_labels(vec![
-                            Label::primary((), start_index..self.idx - 1)
-                                .with_message("expected a binary number here"),
-                        ])
-                        .with_message("no binary number after `0b`")
-                    );
+                        .with_labels(vec![Label::primary((), start_index..self.idx - 1)
+                            .with_message("expected a binary number here")])
+                        .with_message("no binary number after `0b`"));
                 } else {
                     break;
                 }
@@ -464,12 +421,9 @@ impl Lexer {
             })),
             Err(_) => Err(Diagnostic::error()
                 .with_code("E0009")
-                .with_labels(vec![
-                    Label::primary((), start_index..self.idx)
-                        .with_message("hexadecimal number is too large")
-                ])
-                .with_message("hexadecimal number is too large.")
-            )
+                .with_labels(vec![Label::primary((), start_index..self.idx)
+                    .with_message("hexadecimal number is too large")])
+                .with_message("hexadecimal number is too large.")),
         }
     }
 
@@ -531,12 +485,9 @@ impl Lexer {
                 if !is_float {
                     return Err(Diagnostic::error()
                         .with_code("E0003")
-                        .with_labels(vec![
-                            Label::primary((), start_index..self.idx)
-                                .with_message("integers may not have an exponent"),
-                        ])
-                        .with_message("exponent after `.`")
-                    );
+                        .with_labels(vec![Label::primary((), start_index..self.idx)
+                            .with_message("integers may not have an exponent")])
+                        .with_message("exponent after `.`"));
                 }
 
                 if self.chars[self.idx - 1] == '.' {
@@ -551,8 +502,7 @@ impl Lexer {
                             Label::secondary((), self.idx - 2..self.idx - 2)
                                 .with_message("try inserting a `0` after this `.`"),
                         ])
-                        .with_message("exponent after `.`")
-                    );
+                        .with_message("exponent after `.`"));
                 }
 
                 number.push(current_char);
@@ -561,12 +511,9 @@ impl Lexer {
                 if self.idx >= self.chars.len() {
                     return Err(Diagnostic::error()
                         .with_code("E0004")
-                        .with_labels(vec![
-                            Label::primary((), start_index..self.idx)
-                                .with_message("expected an exponent value or `+`/`-`"),
-                        ])
-                        .with_message("expected an exponent value")
-                    );
+                        .with_labels(vec![Label::primary((), start_index..self.idx)
+                            .with_message("expected an exponent value or `+`/`-`")])
+                        .with_message("expected an exponent value"));
                 }
 
                 let current_char = self.chars[self.idx];
@@ -582,12 +529,9 @@ impl Lexer {
                         if first {
                             return Err(Diagnostic::error()
                                 .with_code("E0004")
-                                .with_labels(vec![
-                                    Label::primary((), start_index..self.idx)
-                                        .with_message("expected an exponent value"),
-                                ])
-                                .with_message("expected an exponent value")
-                            );
+                                .with_labels(vec![Label::primary((), start_index..self.idx)
+                                    .with_message("expected an exponent value")])
+                                .with_message("expected an exponent value"));
                         } else {
                             break 'main_number_loop;
                         }
@@ -597,12 +541,9 @@ impl Lexer {
                         if first {
                             return Err(Diagnostic::error()
                                 .with_code("E0005")
-                                .with_labels(vec![
-                                    Label::primary((), start_index..self.idx)
-                                        .with_message("expected a valid exponent value (a number)"),
-                                ])
-                                .with_message("expected a valid exponent value")
-                            );
+                                .with_labels(vec![Label::primary((), start_index..self.idx)
+                                    .with_message("expected a valid exponent value (a number)")])
+                                .with_message("expected a valid exponent value"));
                         } else {
                             break 'main_number_loop;
                         }
@@ -621,7 +562,7 @@ impl Lexer {
 
         let comments = self.get_comments();
         let number = number.replace("_", "");
-        
+
         if is_float {
             match number.parse() {
                 Ok(value) => Ok(TokenTree::Float(Float {
@@ -635,12 +576,9 @@ impl Lexer {
                 })),
                 Err(_) => Err(Diagnostic::error()
                     .with_code("E0006")
-                    .with_labels(vec![
-                        Label::primary((), start_index..self.idx)
-                            .with_message("float number is too large"),
-                    ])
-                    .with_message("float is too large")
-                ),
+                    .with_labels(vec![Label::primary((), start_index..self.idx)
+                        .with_message("float number is too large")])
+                    .with_message("float is too large")),
             }
         } else {
             match number.parse() {
@@ -656,12 +594,9 @@ impl Lexer {
                 })),
                 Err(_) => Err(Diagnostic::error()
                     .with_code("E0007")
-                    .with_labels(vec![
-                        Label::primary((), start_index..self.idx)
-                            .with_message("integer number is too large"),
-                    ])
-                    .with_message("integer is too large")
-                ),
+                    .with_labels(vec![Label::primary((), start_index..self.idx)
+                        .with_message("integer number is too large")])
+                    .with_message("integer is too large")),
             }
         }
     }
@@ -678,10 +613,8 @@ impl Lexer {
             if self.idx >= self.chars.len() {
                 return Err(Diagnostic::error()
                     .with_code("E0010")
-                    .with_labels(vec![
-                        Label::primary((), start_index..self.idx)
-                            .with_message("string never closes")
-                    ])
+                    .with_labels(vec![Label::primary((), start_index..self.idx)
+                        .with_message("string never closes")])
                     .with_message("string never closes"));
             }
 
@@ -695,10 +628,8 @@ impl Lexer {
                 if self.idx >= self.chars.len() {
                     return Err(Diagnostic::error()
                         .with_code("E0010")
-                        .with_labels(vec![
-                            Label::primary((), start_index..self.idx)
-                                .with_message("string never closes")
-                        ])
+                        .with_labels(vec![Label::primary((), start_index..self.idx)
+                            .with_message("string never closes")])
                         .with_message("string never closes"));
                 }
 
@@ -721,34 +652,26 @@ impl Lexer {
                         Err(err) => return Err(err),
                     },
                 }))
-            },
-            Err(err) => {
-                match err {
-                    UnescapeError::InvalidEscape { index, .. } => {
-                        let index = start_index + index;
-
-                        return Err(Diagnostic::error()
-                            .with_code("E0011")
-                            .with_labels(vec![
-                                Label::primary((), index..index)
-                                    .with_message("invalid string escape here"),
-                            ])
-                            .with_message("invalid string escape")
-                        )
-                    },
-                    UnescapeError::InvalidUnicode { index, .. } => {
-                        let index = start_index + index;
-                        return Err(Diagnostic::error()
-                            .with_code("E0012")
-                            .with_labels(vec![
-                                Label::primary((), index..index)
-                                    .with_message("invalid unicode escape here"),
-                            ])
-                            .with_message("invalid unicode escape in string")
-                        );
-                    }
-                }
             }
+            Err(err) => match err {
+                UnescapeError::InvalidEscape { index, .. } => {
+                    let index = start_index + index;
+
+                    return Err(Diagnostic::error()
+                        .with_code("E0011")
+                        .with_labels(vec![Label::primary((), index..index)
+                            .with_message("invalid string escape here")])
+                        .with_message("invalid string escape"));
+                }
+                UnescapeError::InvalidUnicode { index, .. } => {
+                    let index = start_index + index;
+                    return Err(Diagnostic::error()
+                        .with_code("E0012")
+                        .with_labels(vec![Label::primary((), index..index)
+                            .with_message("invalid unicode escape here")])
+                        .with_message("invalid unicode escape in string"));
+                }
+            },
         }
     }
 
@@ -769,8 +692,7 @@ impl Lexer {
                         Label::secondary((), start_index..start_index)
                             .with_message("group starts here"),
                     ])
-                    .with_message("group never ends")
-                );
+                    .with_message("group never ends"));
             }
 
             if self.chars[self.idx] == close {
@@ -797,8 +719,8 @@ impl Lexer {
         }))
     }
 
-    /// Tokenizes a single token from the `chars` list, then returns it, if there was another token and it
-    /// was valid.
+    /// Tokenizes a single token from the `chars` list, then returns it, if
+    /// there was another token and it was valid.
     fn tokenize(&mut self) -> Option<Result<TokenTree, Diagnostic<()>>> {
         if let Err(err) = self.skip() {
             return Some(Err(err));
@@ -819,7 +741,7 @@ impl Lexer {
             if first_char == '-' {
                 if self.idx < self.chars.len() {
                     if Lexer::is_digit(self.chars[self.idx]) {
-                        return Some(self.tokenize_number(true))
+                        return Some(self.tokenize_number(true));
                     }
                 }
             }
@@ -847,12 +769,9 @@ impl Lexer {
         } else {
             Some(Err(Diagnostic::error()
                 .with_code("E0013")
-                .with_labels(vec![
-                    Label::primary((), start_index..start_index)
-                        .with_message("invalid character here")
-                ])
-                .with_message("invalid character")
-            ))
+                .with_labels(vec![Label::primary((), start_index..start_index)
+                    .with_message("invalid character here")])
+                .with_message("invalid character")))
         }
     }
 }
