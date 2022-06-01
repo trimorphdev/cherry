@@ -29,6 +29,8 @@ Now, here's what Cherry's goals *aren't*:
 - [x] The lexer.
 - [ ] The command line interface.
     - [ ] Diagnostic emitter, using `codespan-reporting`.
+        - [ ] Add multiple available themes.
+        - [ ] Allow themes to be changed on command line interface
 - [ ] The parser.
     - [ ] Basic literals.pex
     - [ ] Operator precedence.
