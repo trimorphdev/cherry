@@ -85,6 +85,9 @@ impl CherryConfig {
 fn main() {
     let args = CherryConfig::parse();
 
+    let mut theme = args.theme;
+    theme.display_style = args.diagnostic_style;
+
     match std::fs::read_to_string(args.input.clone()) {
         Ok(str) => {
             let lexer = Lexer::new(&str.clone());
@@ -94,7 +97,7 @@ fn main() {
                     Ok(token) => println!("{:#?}", token),
                     Err(diagnostic) => {
                         let emitter = DiagnosticEmitter::new(args.input, str)
-                            .with_theme(args.theme);
+                            .with_theme(theme);
                         emitter.emit(&diagnostic);
                         exit(1);
                     }
@@ -103,7 +106,7 @@ fn main() {
         },
         Err(_) => {
             let emitter = DiagnosticEmitter::new("".into(), "".into())
-                .with_theme(args.theme);
+                .with_theme(theme);
             emitter.emit(&Diagnostic::error()
                 .with_message("unable to open input file"));
             exit(1);
