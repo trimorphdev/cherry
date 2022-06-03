@@ -30,6 +30,7 @@ impl CherryConfig {
                 .takes_value(true)
                 .required(false)
                 .long("diagnostic-style")
+                .alias("style")
                 .alias("d-style")
                 .alias("diag-style")
                 .alias("diagstyle")
