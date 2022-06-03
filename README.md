@@ -32,7 +32,7 @@ Now, here's what Cherry's goals *aren't*:
         - [x] Add multiple available themes.
         - [x] Allow themes to be changed on command line interface
 - [ ] The parser.
-    - [ ] Basic literals.pex
+    - [ ] Basic literals.
     - [ ] Operator precedence.
     - [ ] Type annotations.
     - [ ] `let` and `const` statements.
